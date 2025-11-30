@@ -70,6 +70,8 @@ Fusion’s native parameter dialog is functional, but it’s **modal** (it block
 
 Once running, you will find the **Live Configurator** button in the **Solid > Modify** panel (right next to *Change Parameters*). Click it to open the persistent sidecar palette.
 
+![LiveConfig Screenshot](https://github.com/edjohnson100/LiveConfig/blob/146a1dff3c3b77ff34225dd1aa367d84c2cb2bb9/resources/LiveConfigDashboard_blank.png)
+
 ### 1. Live Parameters
 
 The add-in automatically scans your design for **User Parameters**.
@@ -105,6 +107,10 @@ This is the killer feature. Once you have your parameters and toggles set exactl
    * 💾 **Update:** Overwrite an existing snapshot with the current screen state.
 
    * 🗑️ **Delete:** Remove a snapshot permanently.
+
+![Light mode example](https://github.com/edjohnson100/LiveConfig/blob/146a1dff3c3b77ff34225dd1aa367d84c2cb2bb9/resources/LiveConfigDashboard_example_light_mode.png)
+
+![Dark mode example](https://github.com/edjohnson100/LiveConfig/blob/146a1dff3c3b77ff34225dd1aa367d84c2cb2bb9/resources/LiveConfigDashboard_example_dark_mode.png)
 
 ## Tech Stack
 
