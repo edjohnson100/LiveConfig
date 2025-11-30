@@ -1,0 +1,11 @@
+# Python junk
+__pycache__/
+*.pyc
+
+# Mac/Windows system junk
+.DS_Store
+Thumbs.db
+
+# Fusion 360/VS Code junk
+.vscode/
+*.manifest.bak

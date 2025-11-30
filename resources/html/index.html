@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>LegacyLayers Config</title>
+</head>
+<body>
+    <div class="header">
+        <div class="title-group">
+            <h2>Live Configurator</h2>
+            <div id="docName" class="sub-header">Scanning...</div>
+        </div>
+        
+        <label class="theme-switch" title="Toggle Light/Dark Mode">
+            <input type="checkbox" id="theme-checkbox" checked>
+            <span class="theme-slider"></span>
+        </label>
+    </div>
+
+    <div id="sec-configs" class="section">
+        <div class="section-header" onclick="toggleSection('sec-configs')">
+            <div class="header-title">
+                <span class="arrow">▼</span>
+                <h3>Snapshots</h3>
+            </div>
+        </div>
+        
+        <div class="section-content">
+            <div id="configList" class="grid-list">
+                <div class="empty-state">No configs saved.</div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="newConfigName" placeholder="New Config Name...">
+                <button id="saveConfigBtn" class="secondary-btn">Save State</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-params" class="section">
+        <div class="section-header" onclick="toggleSection('sec-params')">
+            <div class="header-title">
+                <span class="arrow">▼</span>
+                <h3>Live Parameters</h3>
+            </div>
+            
+            <div class="header-controls" onclick="event.stopPropagation()">
+                <label class="fav-toggle" title="Show Favorites Only">
+                    <input type="checkbox" id="favFilterCheck" checked>
+                    <span class="fav-label">★ Favs</span>
+                </label>
+                <button id="scanBtn" class="icon-btn" title="Rescan Model">↻</button>
+            </div>
+        </div>
+        
+        <div class="section-content">
+            <div id="paramList" class="param-container">
+                <div class="empty-state">No User Parameters found.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-features" class="section">
+        <div class="section-header" onclick="toggleSection('sec-features')">
+            <div class="header-title">
+                <span class="arrow">▼</span>
+                <h3>Tracked Features (CFG_)</h3>
+            </div>
+        </div>
+        
+        <div class="section-content">
+            <div id="featureList" class="feature-container">
+                </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

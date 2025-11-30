@@ -1,0 +1,14 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"F8EEEB71-1CF0-4B22-AEB7-174B4F0176D1",
+	"author":	"Ed Johnson (Making With An EdJ)",
+	"description":	{
+		"":	"A persistent, modeless dashboard for real-time control of User Parameters and Feature Suppression. Save, restore, and manage design configurations (Snapshots) directly inside your Fusion files."
+	},
+	"version":	"1.0.0",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	false,
+	"iconFilename":	"LiveConfigAppIcon.png"
+}
