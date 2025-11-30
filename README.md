@@ -108,7 +108,17 @@ This is the killer feature. Once you have your parameters and toggles set exactl
 
    * 🗑️ **Delete:** Remove a snapshot permanently.
 
+## Screenshots
+
+## Light Mode Example
+
+**Kitchen Sink - No Knob** snapshot is selected with *CFG_KnobGroup* hidden (suppressed) on the timeline.
+
 ![Light mode example](https://github.com/edjohnson100/LiveConfig/blob/146a1dff3c3b77ff34225dd1aa367d84c2cb2bb9/resources/LiveConfigDashboard_example_light_mode.png)
+
+## Dark Mode Example
+
+**Kitchen Sink 3.25" x 15mm** snapshot is selected with *CFG_KnobGroup* visible (unsuppressed) on the timeline.
 
 ![Dark mode example](https://github.com/edjohnson100/LiveConfig/blob/146a1dff3c3b77ff34225dd1aa367d84c2cb2bb9/resources/LiveConfigDashboard_example_dark_mode.png)
 
@@ -130,8 +140,7 @@ For the fellow coders and makers out there, here is how LiveConfig was built:
 
 * **AI Assistance:** Co-authored with Google's Gemini 3 Pro model.
 
-* **Lucy (The Cavachon Puppy):**
-  ***Chief Wellness Officer & Director of Mandatory Breaks***
+* **Lucy (The Cavachon Puppy):** ***Chief Wellness Officer & Director of Mandatory Breaks***
 
   * Still preventing Repetitive Strain Injury one fetch session at a time.
 
