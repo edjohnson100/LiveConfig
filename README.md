@@ -19,6 +19,27 @@ Fusion’s native parameter dialog is functional, but it’s **modal** (it block
 
 ## Installation
 
+### Using Compiled Installers
+
+#### Windows Users
+
+1. **Download:** Download the latest installer (LiveConfig_Win.exe or .msi).
+
+2. Install: Double-click the installer to run it.
+   * Note: If Windows protects your PC saying "Unknown Publisher," click More Info → Run Anyway. (I'm an indie developer, not a giant corporation!)
+
+3. Restart: If Fusion is open, restart it to load the new add-in.
+
+#### Mac Users
+
+1. **Download:** Download the latest package (LiveConfig_Mac.pkg).
+
+2. Install: Double-click the package to run the installer.
+
+   * Note: If macOS prevents the install, Right-Click the file and choose Open, then click Open again in the dialog box.
+
+3. Restart: If Fusion is open, restart it to load the new add-in.
+
 ### Manual Installation
 
 1. **Download:** Download the `LiveConfig` folder.
