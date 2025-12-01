@@ -108,6 +108,11 @@ This is the killer feature. Once you have your parameters and toggles set exactl
 
    * 🗑️ **Delete:** Remove a snapshot permanently.
 
+## Sample Fusion File
+You can download a sample Fusion file (**_Sink_Strainer_Live_Config_Demo.f3d_**) from the **Releases > Assets** section.
+It has 4 saved snapshots, a timelone feature group, and a number of User Parameters to user for demo and testing.
+[Sink_Strainer_Live_Config_Demo.f3d](https://github.com/edjohnson100/LiveConfig/releases/download/v1.0.0/Sink_Strainer_Live_Config_Demo.f3d)
+
 ## Screenshots
 
 ## Light Mode Example
