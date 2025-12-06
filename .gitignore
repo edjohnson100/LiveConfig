@@ -1,11 +1,54 @@
-# Python junk
+# ----------------------
+# 1. Python & VS Code (The Basics)
+# ----------------------
 __pycache__/
 *.pyc
-
-# Mac/Windows system junk
-.DS_Store
-Thumbs.db
-
-# Fusion 360/VS Code junk
 .vscode/
+.venv/
+*.log
+
+# ----------------------
+# 2. Operating System Junk
+# ----------------------
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ----------------------
+# 3. Autodesk Fusion 360 Specifics
+# ----------------------
+# Fusion creates these backup files when you edit a manifest in the UI
 *.manifest.bak
+# Lock files sometimes created during runtime
+*.lock
+
+# ----------------------
+# 4. Installer & Build Output (CRITICAL)
+# ----------------------
+# Ignore the folder where Inno Setup puts the compiled EXE
+Output/
+
+# Allow the "Installers" folder itself...
+!Installers/
+
+# ...but ignore the specific binary files INSIDE it.
+Installers/*.exe
+Installers/*.msi
+Installers/*.pkg
+Installers/*.dmg
+Installers/*.zip
+Installers/*.wixpdb
+Installers/Output/
+
+# Ignore compiled binaries just in case they slip into other folders
+*.exe
+*.msi
+*.pkg
+*.dmg
+*.zip
