@@ -34,6 +34,13 @@ Desktop.ini
 # Ignore the folder where Inno Setup puts the compiled EXE
 Output/
 
+# ----------------------
+# 5. Security & Local Settings
+# ----------------------
+.env
+.env.*
+!.env.example
+
 # Allow the "Installers" folder itself...
 !Installers/
 
