@@ -4,17 +4,21 @@ set -e
 # ==============================================================================
 # 📝 CONFIGURATION (edit this section)
 # ==============================================================================
-APP_NAME="My_Addin_Name"                 
-IDENTIFIER="com.mybrand.myaddin"         
+APP_NAME="MyAddinName"                 
+# AddIns or Scripts
+APP_TYPE="AddIns"
+IDENTIFIER="com.makingwithanedj.myaddin"         
 VERSION="1.0"
+# ==============================================================================
+# 📝 END CONFIGURATION
 # ==============================================================================
 
 # GET PARENT FOLDER NAME
-# We assume the script is in /Repo/Installers/
-# So ".." is /Repo/
+# We assume the script is in /[Repo Name]/Installers/
+# So ".." is /[Repo Name]/
 REPO_ROOT=".."
 FOLDER_NAME=$(basename "$(cd "$REPO_ROOT" && pwd)")
-INSTALL_LOCATION="Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/$FOLDER_NAME"
+INSTALL_LOCATION="Library/Application Support/Autodesk/Autodesk Fusion 360/API/$APP_TYPE/$FOLDER_NAME"
 
 echo "=========================================="
 echo "      MAC USER-ONLY INSTALLER BUILDER"
@@ -67,10 +71,11 @@ cat <<EOF > distribution.xml
 EOF
 
 # 6. BUILD FINAL INSTALLER
-echo "💿 Creating Final Installer..."
+FINAL_PACKAGE_NAME="${APP_NAME}Installer_Mac.pkg"
+echo "珍 Creating Final Installer: $FINAL_PACKAGE_NAME"
 productbuild --distribution distribution.xml \
              --package-path . \
-             "$APP_NAME.pkg"
+             "$FINAL_PACKAGE_NAME"
 
 # 7. CLEANUP
 rm component.pkg
