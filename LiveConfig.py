@@ -41,14 +41,9 @@ class MyCommandExecuteHandler(adsk.core.CommandEventHandler):
             palette = ui.palettes.itemById(palette_id)
             
             if not palette:
-                script_folder = os.path.dirname(os.path.realpath(__file__))
-                html_path = os.path.join(script_folder, 'resources', 'html', 'index.html')
-                # Force forward slashes for Windows compatibility
-                url = html_path.replace('\\', '/')
-                
-                # Use file:/// prefix for local files
-                if not url.startswith('file:///'):
-                    url = 'file:///' + url
+                cmd_path = Path(__file__).resolve().parent
+                html_file = cmd_path / 'resources' / 'html' / 'index.html'
+                url = html_file.as_uri()
                 
                 palette = ui.palettes.add(palette_id, 'LiveConfig', url, True, True, True, 350, 500)
                 palette.dockingState = adsk.core.PaletteDockingStates.PaletteDockStateRight
@@ -97,7 +92,6 @@ class MyHTMLEventHandler(adsk.core.HTMLEventHandler):
                 if palette: palette.sendInfoToHTML('update_ui', payload)
 
             elif action == 'save_snapshot':
-                # Simplified: No longer accepts 'include_apps'
                 success = config_logic.save_snapshot(data.get('config_name'))
                 if success:
                     payload = config_logic.scan_model()

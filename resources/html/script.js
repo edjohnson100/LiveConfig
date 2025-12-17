@@ -1,6 +1,4 @@
 // script.js
-// Handles communication between the HTML Sidecar and Fusion 360
-
 document.addEventListener('DOMContentLoaded', function() {
     // --- THEME LOGIC ---
     const toggleSwitch = document.getElementById('theme-checkbox');
@@ -43,30 +41,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (saveBtn) saveBtn.addEventListener('click', saveSnapshot);
 });
 
-// --- CACHE FOR FILTERING ---
+// --- CACHE ---
 let lastReceivedData = null;
 
-// --- UI HELPERS ---
-
+// --- HELPERS ---
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
-    if (section) {
-        section.classList.toggle('collapsed');
-    }
+    if (section) section.classList.toggle('collapsed');
 }
 
-// --- STATE VERIFICATION ---
 function isConfigMatch(data, configName) {
     if (!configName || !data.configs || !data.configs[configName]) return false;
     const saved = data.configs[configName];
 
+    // Check Params
     if (saved.params) {
         for (const [name, savedExpr] of Object.entries(saved.params)) {
             const currentParam = data.parameters.find(p => p.name === name);
             if (!currentParam || currentParam.expression !== savedExpr) return false;
         }
     }
-
+    // Check Features
     if (saved.features) {
         for (const [name, savedSuppressed] of Object.entries(saved.features)) {
             const currentFeat = data.features.find(f => f.name === name);
@@ -83,8 +78,7 @@ function markAsDirty() {
     if (nameInput) nameInput.style.borderColor = '#ff9e3b';
 }
 
-// --- CONNECTION MANAGER ---
-
+// ... (Connection Manager) ...
 let connectionAttempts = 0;
 const MAX_ATTEMPTS = 20;
 
@@ -135,8 +129,6 @@ function waitForFusion() {
     }
 }
 
-// --- COMMUNICATION ---
-
 function sendToFusion(action, data = {}) {
     const dataStr = JSON.stringify(data);
     if (window.adsk && window.adsk.fusion && window.adsk.fusion.sendCommand) {
@@ -157,7 +149,6 @@ function refreshData() {
 
 function renderUI(data) {
     lastReceivedData = data;
-
     const docNameEl = document.getElementById('docName');
     if (docNameEl) docNameEl.innerText = data.doc_name || "Unknown Design";
 
@@ -174,7 +165,7 @@ function renderUI(data) {
 
         if (paramsToShow.length === 0) {
             if (favOnly && data.parameters.length > 0) {
-                 pContainer.innerHTML = '<div class="empty-state">No Favorites marked. Uncheck "Favs" to see all.</div>';
+                 pContainer.innerHTML = '<div class="empty-state">No Favorites marked. Uncheck ★ Favs to view all.</div>';
             } else {
                  pContainer.innerHTML = '<div class="empty-state">No User Parameters found.</div>';
             }
@@ -182,22 +173,13 @@ function renderUI(data) {
             paramsToShow.forEach(param => {
                 const row = document.createElement('div');
                 row.className = 'param-row';
-                
                 const starColor = param.isFavorite ? '#ff9e3b' : '#555';
-                const starTitle = param.isFavorite ? 'Unfavorite' : 'Favorite';
-                
-                const star = `<span class="fav-star" 
-                                    title="${starTitle}" 
-                                    style="color:${starColor}; margin-right:6px; cursor:pointer;"
-                                    onclick="toggleFavorite('${param.name}')">★</span>`;
+                const star = `<span class="fav-star" style="color:${starColor}; margin-right:6px; cursor:pointer;" onclick="toggleFavorite('${param.name}')">★</span>`;
                 
                 row.innerHTML = `
                     <div class="param-label" title="${param.name}">${star}${param.name}</div>
                     <div class="param-input">
-                        <input type="text" 
-                               value="${param.expression}" 
-                               onchange="updateParam('${param.name}', this.value)"
-                               onkeydown="handleEnter(event, this)">
+                        <input type="text" value="${param.expression}" onchange="updateParam('${param.name}', this.value)" onkeydown="handleEnter(event, this)">
                     </div>
                 `;
                 pContainer.appendChild(row);
@@ -225,7 +207,6 @@ function renderUI(data) {
             configNames.forEach(name => {
                 const row = document.createElement('div');
                 row.className = 'config-row';
-                
                 const btn = document.createElement('button');
                 btn.className = 'config-btn';
                 if (effectiveActive === name) btn.classList.add('active-config');
@@ -235,13 +216,11 @@ function renderUI(data) {
                 const updateBtn = document.createElement('button');
                 updateBtn.className = 'action-btn update-btn';
                 updateBtn.innerHTML = '💾';
-                updateBtn.title = 'Update';
                 updateBtn.onclick = () => updateSnapshot(name);
 
                 const delBtn = document.createElement('button');
                 delBtn.className = 'action-btn delete-btn';
                 delBtn.innerHTML = '🗑️';
-                delBtn.title = 'Delete';
                 delBtn.onclick = () => deleteSnapshot(name);
 
                 row.appendChild(btn);
@@ -252,7 +231,7 @@ function renderUI(data) {
         }
     }
 
-    // 3. Render Features
+    // 3. Render Timeline Features
     const fContainer = document.getElementById('featureList');
     if (fContainer) {
         fContainer.innerHTML = '';
@@ -276,23 +255,18 @@ function renderUI(data) {
 
 // --- LOGIC ---
 function updateParam(name, value) {
-    // 1. Send command to Fusion (The Source of Truth)
     sendToFusion('update_param', { name: name, value: value });
-    // 2. Update Local Cache (The UI Memory)
-    // This prevents the value from reverting if we re-render (e.g. toggling favorites)
     if (lastReceivedData && lastReceivedData.parameters) {
         const param = lastReceivedData.parameters.find(p => p.name === name);
-        if (param) {
-            param.expression = value;
-        }
+        if (param) param.expression = value;
     }
-    // 3. Update Visuals
     markAsDirty(); 
-}function toggleFavorite(name) {
+}
+function toggleFavorite(name) {
     sendToFusion('toggle_favorite', { name: name });
 }
 function toggleFeature(name, isChecked) {
-    const shouldSuppress = !isChecked;
+    const shouldSuppress = !isChecked; // Toggle: On = Not Suppressed
     sendToFusion('toggle_feature', { name: name, is_suppressed: shouldSuppress });
 }
 function handleEnter(e, input) {
@@ -302,8 +276,6 @@ function saveSnapshot() {
     const nameInput = document.getElementById('newConfigName');
     const name = nameInput.value.trim();
     if (!name) return;
-    
-    // Removed includeApps logic
     sendToFusion('save_snapshot', { config_name: name });
     nameInput.value = ''; 
 }

@@ -2,12 +2,23 @@ import os
 import uuid
 
 # ==============================================================================
-# 📝 CONFIGURATION: EDIT THESE 3 LINES FOR EACH PROJECT
+# 📝 CONFIGURATION: EDIT THIS SECTION FOR EACH PROJECT
 # ==============================================================================
-APP_NAME = "My Addin Name"               
-MANUFACTURER = "My Brand Name"           
+APP_NAME = "LiveConfig"               
+# Set this to "AddIns" or "Scripts"
+APP_TYPE = "AddIns"
+MANUFACTURER = "Ed Johnson (Making With An EdJ)"           
+
 # IMPORTANT: Generate a NEW GUID for every NEW app.
-PRODUCT_UPGRADE_CODE = "PUT-NEW-GUID-HERE" 
+# Once assigned to an app, NEVER change it (this allows upgrades).
+# Run this to generate multiple quantities:
+# Change the last number for the quantity desired. Make at least 2 - you'll want a different one for your Fusion .manifest file. 
+#
+# python -c "import uuid, sys; print('\n'.join(str(uuid.uuid4()).upper() for _ in range(int(sys.argv[1]))))" 5
+#
+PRODUCT_UPGRADE_CODE = "34E3DCC6-FF83-4690-9490-CB845D76E79F" 
+# ==============================================================================
+# 📝 -- END CONFIGURATION --
 # ==============================================================================
 
 # IGNORE LIST (Added 'Installers' to prevent recursion)
@@ -92,7 +103,7 @@ def main():
         <Directory Id="Autodesk" Name="Autodesk">
            <Directory Id="Fusion360" Name="Autodesk Fusion 360">
              <Directory Id="API" Name="API">
-               <Directory Id="AddIns" Name="AddIns">
+               <Directory Id="{APP_TYPE}" Name="{APP_TYPE}">
                  <Directory Id="INSTALLFOLDER" Name="{folder_name}">
                     {dir_xml}
                  </Directory>

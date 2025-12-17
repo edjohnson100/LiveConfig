@@ -7,6 +7,9 @@ CLS
 :: ==============================================================================
 :: Path to Inno Setup Compiler
 SET "ISCC=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
+:: * Define the Application Name for Installer Filenames ⭐️
+SET "APP_NAME=LiveConfig" 
 :: ==============================================================================
 
 ECHO ==========================================
@@ -49,17 +52,16 @@ IF %ERRORLEVEL% NEQ 0 (
 :: 3. Compile (Candle)
 candle installer.wxs -nologo
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Candle (WiX) failed.
+    ECHO [ERROR] Candle - WiX failed.
     PAUSE
     EXIT /B
 )
 
 :: 4. Link (Light) -> Output MSI to THIS folder
-:: Note: We define the output name dynamically in the Python script or hardcode here.
-:: For simplicity, we output as "Installer.msi" and let you rename, or use the Python variable.
-light -ext WixUIExtension -out Installer.msi installer.wixobj -sice:ICE64 -sice:ICE91 -sw1032 -nologo
+:: NOTE: The output file name is now dynamically set using the APP_NAME variable!
+light -ext WixUIExtension -out "%APP_NAME%Installer_Win.msi" installer.wixobj -sice:ICE64 -sice:ICE91 -sw1032 -nologo
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Light (WiX) failed.
+    ECHO [ERROR] Light - WiX failed.
     PAUSE
     EXIT /B
 )

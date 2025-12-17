@@ -6,7 +6,7 @@
 	"description":	{
 		"":	"A persistent, modeless dashboard for real-time control of User Parameters and Feature Suppression. Save, restore, and manage design configurations (Snapshots) directly inside your Fusion files."
 	},
-	"version":	"1.0.0",
+	"version":	"1.0.1",
 	"runOnStartup":	false,
 	"supportedOS":	"windows|mac",
 	"editEnabled":	false,

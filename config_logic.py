@@ -7,7 +7,7 @@ ATTRIBUTE_NAME = "Config_Snapshots"
 ACTIVE_CONFIG_ATTR = "Last_Active_Config"
 
 def scan_model():
-    """Scans parameters, features, and saved configs."""
+    """Scans parameters and timeline features/groups."""
     app = adsk.core.Application.get()
     design = app.activeProduct
     if not design: return json.dumps({"error": "No design"})
@@ -15,22 +15,30 @@ def scan_model():
     raw_name = app.activeDocument.name
     clean_name = re.sub(r'\s+v\d+$', '', raw_name)
 
-    # Parameters
+    # 1. Parameters (Safe for Text/Boolean)
     param_data = []
     for param in design.userParameters:
+        safe_val = 0
+        try:
+            # Try to get numeric value
+            safe_val = param.value
+        except:
+            # Fallback for Text/Boolean parameters that crash on .value
+            pass
+
         param_data.append({
             "name": param.name,
             "expression": param.expression,
-            "value": param.value, 
+            "value": safe_val, 
             "unit": param.unit,
             "isFavorite": getattr(param, "isFavorite", False)
         })
 
-    # Features & Groups
+    # 2. Timeline Features (Root Features & Groups)
     feature_data = []
     root = design.rootComponent
     
-    # 1. Scan Root Features
+    # A. Root Features
     for feature in root.features:
         if feature.name.startswith("CFG_"):
             feature_data.append({
@@ -38,7 +46,7 @@ def scan_model():
                 "isSuppressed": feature.isSuppressed
             })
             
-    # 2. Scan Timeline Groups
+    # B. Timeline Groups
     timeline = design.timeline
     for group in timeline.timelineGroups:
         if group.name.startswith("CFG_"):
@@ -47,7 +55,7 @@ def scan_model():
                 "isSuppressed": group.isSuppressed
             })
 
-    # Saved Snapshots
+    # 3. Saved Snapshots
     saved_configs = {}
     attr = root.attributes.itemByName(ATTRIBUTE_GROUP, ATTRIBUTE_NAME)
     if attr:
@@ -56,7 +64,6 @@ def scan_model():
         except:
             saved_configs = {}
 
-    # Active Config Flag
     last_active = ""
     active_attr = root.attributes.itemByName(ATTRIBUTE_GROUP, ACTIVE_CONFIG_ATTR)
     if active_attr:
@@ -97,10 +104,7 @@ def toggle_feature(name, should_suppress):
     design = app.activeProduct
     root = design.rootComponent
     
-    # 1. Try Feature
     item = root.features.itemByName(name)
-    
-    # 2. Try Timeline Group (Manual Iteration Fix)
     if not item:
         timeline = design.timeline
         for group in timeline.timelineGroups:
@@ -115,7 +119,6 @@ def toggle_feature(name, should_suppress):
     return scan_model()
 
 def save_snapshot(config_name):
-    """Saves current state to root attributes."""
     app = adsk.core.Application.get()
     design = app.activeProduct
     if not design: return False
@@ -125,7 +128,7 @@ def save_snapshot(config_name):
     # 1. Parameters
     params = {p.name: p.expression for p in design.userParameters}
     
-    # 2. Features/Groups
+    # 2. Features
     feats = {}
     for f in root.features:
         if f.name.startswith("CFG_"):
@@ -149,7 +152,6 @@ def save_snapshot(config_name):
         "features": feats
     }
 
-    # Save back
     root.attributes.add(ATTRIBUTE_GROUP, ATTRIBUTE_NAME, json.dumps(current_data))
     root.attributes.add(ATTRIBUTE_GROUP, ACTIVE_CONFIG_ATTR, config_name)
     return True
@@ -160,7 +162,6 @@ def delete_snapshot(config_name):
     if not design: return False
     
     root = design.rootComponent 
-
     attr = root.attributes.itemByName(ATTRIBUTE_GROUP, ATTRIBUTE_NAME)
     if not attr: return False
     
@@ -199,7 +200,7 @@ def apply_snapshot(config_name):
             p = design.userParameters.itemByName(name)
             if p: p.expression = expr
             
-        # 2. Apply Features/Groups
+        # 2. Apply Timeline Features
         saved_feats = snapshot.get("features", {})
         timeline = design.timeline
         for name, is_suppressed in saved_feats.items():
@@ -212,7 +213,6 @@ def apply_snapshot(config_name):
             if item: 
                 item.isSuppressed = is_suppressed
 
-        # Update active flag
         root.attributes.add(ATTRIBUTE_GROUP, ACTIVE_CONFIG_ATTR, config_name)
     except:
         pass
