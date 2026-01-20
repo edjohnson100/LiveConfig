@@ -1,14 +1,12 @@
 {
-	"autodeskProduct":	"Fusion",
-	"type":	"addin",
-	"id":	"F8EEEB71-1CF0-4B22-AEB7-174B4F0176D1",
-	"author":	"Ed Johnson (Making With An EdJ)",
-	"description":	{
-		"":	"A persistent, modeless dashboard for real-time control of User Parameters and Feature Suppression. Save, restore, and manage design configurations (Snapshots) directly inside your Fusion files."
-	},
-	"version":	"1.0.1",
-	"runOnStartup":	false,
-	"supportedOS":	"windows|mac",
-	"editEnabled":	false,
-	"iconFilename":	"LiveConfigAppIcon.png"
+	"autodeskProduct": "Fusion",
+	"type": "addin",
+	"id": "F8EEEB71-1CF0-4B22-AEB7-174B4F0176D1",
+	"author": "Ed Johnson - Making With An EdJ",
+	"description": "Real-time configuration manager with a persistent palette dashboard. | Key Features: Save and restore design 'Snapshots' (Parameters & Feature suppression), filter timeline objects via 'CFG_' prefix, toggle favorites, and auto-refresh on document switch. | Context: Design automation and variant management.",
+	"version": "1.1.0",
+	"runOnStartup": false,
+	"supportedOS": "windows|mac",
+	"editEnabled": true,
+	"iconFilename": "LiveConfigAppIcon.png"
 }
