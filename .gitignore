@@ -28,6 +28,12 @@ Desktop.ini
 # Lock files sometimes created during runtime
 *.lock
 
+# Per-machine imported/custom themes (Theme Designer Pro lite tier)
+imported_themes.json
+
+# Per-machine settings (palette geometry, etc.)
+config.json
+
 # ----------------------
 # 4. Installer & Build Output (CRITICAL)
 # ----------------------

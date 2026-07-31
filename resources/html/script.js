@@ -1,16 +1,7 @@
 // script.js
 document.addEventListener('DOMContentLoaded', function() {
-    // --- THEME LOGIC ---
-    const toggleSwitch = document.getElementById('theme-checkbox');
-    const savedTheme = localStorage.getItem('ll_config_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    toggleSwitch.checked = (savedTheme === 'dark');
-
-    toggleSwitch.addEventListener('change', function(e) {
-        const newTheme = e.target.checked ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('ll_config_theme', newTheme);
-    });
+    // --- THEME MANAGER ---
+    initThemeManager();
 
     // --- FAV FILTER LOGIC ---
     const favCheck = document.getElementById('favFilterCheck');
@@ -43,6 +34,143 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- CACHE ---
 let lastReceivedData = null;
+
+// --- THEME MANAGER ---
+const THEME_VARS = [
+    '--bg-body', '--text-main', '--text-sub', '--border-color',
+    '--row-bg', '--row-border', '--row-hover',
+    '--input-bg', '--input-border', '--input-text',
+    '--btn-sec-bg', '--btn-sec-text', '--btn-sec-hover',
+    '--active-border', '--active-text', '--active-bg',
+    '--toggle-bg', '--header-hover'
+];
+const builtInThemeIds = new Set(['light', 'dark', 'sepia']);
+let customThemes = JSON.parse(localStorage.getItem('ll_config_custom_themes') || '{}');
+let _importedThemesLoaded = false;
+let themeSelector, themeRemoveBtn;
+
+function initThemeManager() {
+    themeSelector = document.getElementById('themeSelector');
+    themeRemoveBtn = document.getElementById('themeRemoveBtn');
+
+    document.getElementById('themeImportBtn').addEventListener('click', requestImportTheme);
+    document.getElementById('themeExportBtn').addEventListener('click', requestExportTheme);
+    themeRemoveBtn.addEventListener('click', removeSelectedTheme);
+    document.getElementById('themeResetLink').addEventListener('click', resetThemeCache);
+    themeSelector.addEventListener('change', changeTheme);
+
+    for (const id in customThemes) addCustomOption(id);
+    applyCustomThemeVars();
+
+    const savedTheme = localStorage.getItem('ll_config_theme') || 'dark';
+    themeSelector.value = builtInThemeIds.has(savedTheme) || (savedTheme in customThemes) ? savedTheme : 'dark';
+    changeTheme();
+}
+
+function applyCustomThemeVars() {
+    let styleTag = document.getElementById('dynamic-theme-overrides');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'dynamic-theme-overrides';
+        document.head.appendChild(styleTag);
+    }
+    let out = '';
+    for (const [themeId, themeVars] of Object.entries(customThemes)) {
+        const decls = Object.entries(themeVars).map(([k, v]) => `${k}: ${v};`).join(' ');
+        out += `[data-theme="${themeId}"] { ${decls} }\n`;
+    }
+    styleTag.textContent = out;
+}
+
+function addCustomOption(id) {
+    if (!themeSelector.querySelector(`option[value="${id}"]`)) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${id} (custom)`;
+        themeSelector.appendChild(opt);
+    }
+}
+
+function mergeImportedThemes(hostThemes) {
+    if (_importedThemesLoaded || !hostThemes || Object.keys(hostThemes).length === 0) return;
+    _importedThemesLoaded = true;
+    for (const id in hostThemes) {
+        customThemes[id] = hostThemes[id];
+        addCustomOption(id);
+    }
+    localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
+    applyCustomThemeVars();
+}
+
+function updateRemoveButtonState() {
+    const id = themeSelector.value;
+    const removable = !builtInThemeIds.has(id) && (id in customThemes);
+    themeRemoveBtn.disabled = !removable;
+    themeRemoveBtn.title = removable ? `Remove the "${id}" theme` : 'Select a custom (imported) theme to enable';
+}
+
+function changeTheme() {
+    const id = themeSelector.value;
+    document.documentElement.setAttribute('data-theme', id);
+    localStorage.setItem('ll_config_theme', id);
+    updateRemoveButtonState();
+}
+
+function removeSelectedTheme() {
+    const id = themeSelector.value;
+    if (builtInThemeIds.has(id) || !(id in customThemes)) return;
+    if (!confirm(`Permanently remove the "${id}" theme? Re-import its .theme.json to bring it back.`)) return;
+    delete customThemes[id];
+    localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
+    sendToFusion('remove_imported_theme', { id: id });
+    const opt = themeSelector.querySelector(`option[value="${id}"]`);
+    if (opt) opt.remove();
+    applyCustomThemeVars();
+    themeSelector.value = 'dark';
+    changeTheme();
+}
+
+function requestImportTheme() { sendToFusion('import_theme'); }
+
+function requestExportTheme() {
+    const id = themeSelector.value;
+    const computed = getComputedStyle(document.documentElement);
+    const vars = {};
+    THEME_VARS.forEach(v => { vars[v] = computed.getPropertyValue(v).trim(); });
+    const content = JSON.stringify({ id: id, vars: vars }, null, 2);
+    sendToFusion('export_theme', { content: content, default_name: `${id}.theme.json` });
+}
+
+function resetThemeCache() {
+    if (!confirm('This will permanently delete all custom imported themes. Continue?')) return;
+    localStorage.removeItem('ll_config_custom_themes');
+    localStorage.removeItem('ll_config_theme');
+    customThemes = {};
+    _importedThemesLoaded = false;
+    sendToFusion('reset_imported_themes');
+    themeSelector.querySelectorAll('option').forEach(opt => {
+        if (!builtInThemeIds.has(opt.value)) opt.remove();
+    });
+    const styleTag = document.getElementById('dynamic-theme-overrides');
+    if (styleTag) styleTag.textContent = '';
+    themeSelector.value = 'dark';
+    changeTheme();
+}
+
+function handleThemeImported(parsed) {
+    try {
+        const themeData = JSON.parse(parsed.content);
+        if (themeData.vars && themeData.id !== undefined) {
+            customThemes[themeData.id] = themeData.vars;
+            localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
+            sendToFusion('save_imported_theme', { id: themeData.id, vars: themeData.vars });
+            addCustomOption(themeData.id);
+            applyCustomThemeVars();
+            themeSelector.value = themeData.id;
+            changeTheme();
+        }
+    } catch (e) { console.log('Invalid theme JSON', e); }
+}
 
 // --- HELPERS ---
 function toggleSection(sectionId) {
@@ -109,6 +237,15 @@ function waitForFusion() {
                     }
                     return "OK";
                 }
+                if (action === 'theme_imported') {
+                    try {
+                        var parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                        handleThemeImported(parsed);
+                    } catch (e) {
+                        console.error("Theme Import Parse Error", e);
+                    }
+                    return "OK";
+                }
             }
         };
 
@@ -149,6 +286,8 @@ function refreshData() {
 
 function renderUI(data) {
     lastReceivedData = data;
+    if (data.addin_version) document.getElementById('versionTag').textContent = 'v' + data.addin_version;
+    if (data.imported_themes) mergeImportedThemes(data.imported_themes);
     const docNameEl = document.getElementById('docName');
     if (docNameEl) docNameEl.innerText = data.doc_name || "Unknown Design";
 

@@ -7,14 +7,23 @@
 <body>
     <div class="header">
         <div class="title-group">
-            <h2>Live Configurator</h2>
+            <h2>Live Configurator<span id="versionTag" class="version-tag"></span></h2>
             <div id="docName" class="sub-header">Scanning...</div>
         </div>
-        
-        <label class="theme-switch" title="Toggle Light/Dark Mode">
-            <input type="checkbox" id="theme-checkbox" checked>
-            <span class="theme-slider"></span>
-        </label>
+    </div>
+
+    <div class="theme-manager-row">
+        <select id="themeSelector">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="sepia">Sepia</option>
+        </select>
+        <button class="theme-icon-btn" id="themeImportBtn" title="Import theme (.theme.json)">⬆</button>
+        <button class="theme-icon-btn" id="themeExportBtn" title="Export current theme">⬇</button>
+        <button class="theme-icon-btn" id="themeRemoveBtn" title="Select a custom (imported) theme to enable" disabled>✕</button>
+    </div>
+    <div class="theme-reset-row">
+        <span class="factory-reset-link" id="themeResetLink">Factory Reset Theme Cache</span>
     </div>
 
     <div id="sec-configs" class="section">

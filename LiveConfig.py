@@ -44,10 +44,15 @@ class MyCommandExecuteHandler(adsk.core.CommandEventHandler):
                 cmd_path = Path(__file__).resolve().parent
                 html_file = cmd_path / 'resources' / 'html' / 'index.html'
                 url = html_file.as_uri()
-                
-                palette = ui.palettes.add(palette_id, 'LiveConfig', url, True, True, True, 350, 500)
+
+                geometry = config_logic._load_config().get('palette_geometry', {})
+                width = geometry.get('width', 350)
+                height = geometry.get('height', 500)
+
+                palette = ui.palettes.add(palette_id, 'LiveConfig', url, True, True, True, width, height)
                 palette.dockingState = adsk.core.PaletteDockingStates.PaletteDockStateRight
-                
+                config_logic._restore_palette_geometry(palette)
+
                 onHtmlEvent = MyHTMLEventHandler()
                 palette.incomingFromHTML.add(onHtmlEvent)
                 handlers.append(onHtmlEvent)
@@ -111,6 +116,29 @@ class MyHTMLEventHandler(adsk.core.HTMLEventHandler):
                 palette = ui.palettes.itemById(palette_id)
                 palette.sendInfoToHTML('update_ui', payload)
 
+            elif action == 'export_theme':
+                config_logic.export_theme_logic(data.get('content'), data.get('default_name'))
+
+            elif action == 'import_theme':
+                content = config_logic.import_theme_logic()
+                if content:
+                    palette = ui.palettes.itemById(palette_id)
+                    if palette: palette.sendInfoToHTML('theme_imported', json.dumps({'content': content}))
+
+            elif action == 'save_imported_theme':
+                theme_id = data.get('id')
+                theme_vars = data.get('vars')
+                if theme_id and isinstance(theme_vars, dict):
+                    config_logic.save_imported_theme(theme_id, theme_vars)
+
+            elif action == 'remove_imported_theme':
+                theme_id = data.get('id')
+                if theme_id:
+                    config_logic.delete_imported_theme(theme_id)
+
+            elif action == 'reset_imported_themes':
+                config_logic.clear_imported_themes()
+
         except:
             if ui:
                 ui.messageBox('HTML Event Failed:\n{}'.format(traceback.format_exc()))
@@ -132,7 +160,9 @@ class MyPaletteCloseHandler(adsk.core.UserInterfaceGeneralEventHandler):
     def __init__(self):
         super().__init__()
     def notify(self, args):
-        pass
+        palette = ui.palettes.itemById(palette_id)
+        if palette:
+            config_logic._save_palette_geometry(palette)
 
 def run(context):
     global ui, app
@@ -178,7 +208,9 @@ def run(context):
 def stop(context):
     try:
         palette = ui.palettes.itemById(palette_id)
-        if palette: palette.deleteMe()
+        if palette:
+            config_logic._save_palette_geometry(palette)
+            palette.deleteMe()
 
         modify_panel = ui.allToolbarPanels.itemById('SolidModifyPanel')
         if modify_panel:
