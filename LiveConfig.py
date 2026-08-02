@@ -117,13 +117,13 @@ class MyHTMLEventHandler(adsk.core.HTMLEventHandler):
                 palette.sendInfoToHTML('update_ui', payload)
 
             elif action == 'export_theme':
-                config_logic.export_theme_logic(data.get('content'), data.get('default_name'))
+                config_logic.export_theme_logic(data.get('file_type'), data.get('content'), data.get('default_name'))
 
             elif action == 'import_theme':
-                content = config_logic.import_theme_logic()
+                content = config_logic.import_theme_logic(data.get('file_type'))
                 if content:
                     palette = ui.palettes.itemById(palette_id)
-                    if palette: palette.sendInfoToHTML('theme_imported', json.dumps({'content': content}))
+                    if palette: palette.sendInfoToHTML('theme_imported', content)
 
             elif action == 'save_imported_theme':
                 theme_id = data.get('id')
@@ -184,7 +184,7 @@ def run(context):
             resource_dir 
         )
         
-        tool_clip_path = os.path.join(resource_dir, 'LiveConfigTooltipIcon.png')
+        tool_clip_path = os.path.join(resource_dir, 'toolClip.png')
         if os.path.exists(tool_clip_path):
             cmdDef.toolClipFilename = tool_clip_path
         

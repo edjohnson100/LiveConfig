@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- THEME MANAGER ---
     initThemeManager();
 
+    // --- TABS ---
+    const savedTab = localStorage.getItem('ll_config_active_tab') || 'tab-configs';
+    switchTab(savedTab);
+
     // --- FAV FILTER LOGIC ---
     const favCheck = document.getElementById('favFilterCheck');
     const savedFavState = localStorage.getItem('ll_fav_only');
@@ -37,27 +41,31 @@ let lastReceivedData = null;
 
 // --- THEME MANAGER ---
 const THEME_VARS = [
+    '--font-family', '--font-size-base',
     '--bg-body', '--text-main', '--text-sub', '--border-color',
     '--row-bg', '--row-border', '--row-hover',
-    '--input-bg', '--input-border', '--input-text',
-    '--btn-sec-bg', '--btn-sec-text', '--btn-sec-hover',
+    '--input-bg', '--input-border', '--input-text', '--input-placeholder',
+    '--header-hover', '--tab-bg', '--tab-active-bg', '--tab-text', '--tab-active-text',
+    '--btn-primary', '--btn-primary-hover',
+    '--btn-secondary', '--btn-secondary-text', '--btn-secondary-hover',
+    '--btn-success', '--btn-success-hover',
+    '--status-success-bg', '--status-success-text',
+    '--status-error-bg', '--status-error-text',
+    '--status-info-bg', '--status-info-text',
+    '--banner-warning-bg', '--banner-warning-text', '--banner-warning-border',
     '--active-border', '--active-text', '--active-bg',
-    '--toggle-bg', '--header-hover'
+    '--toggle-bg'
 ];
 const builtInThemeIds = new Set(['light', 'dark', 'sepia']);
 let customThemes = JSON.parse(localStorage.getItem('ll_config_custom_themes') || '{}');
 let _importedThemesLoaded = false;
-let themeSelector, themeRemoveBtn;
+let themeSelector, themeRemoveBtn, fontFamilySelector, fontSizeSelector;
 
 function initThemeManager() {
     themeSelector = document.getElementById('themeSelector');
     themeRemoveBtn = document.getElementById('themeRemoveBtn');
-
-    document.getElementById('themeImportBtn').addEventListener('click', requestImportTheme);
-    document.getElementById('themeExportBtn').addEventListener('click', requestExportTheme);
-    themeRemoveBtn.addEventListener('click', removeSelectedTheme);
-    document.getElementById('themeResetLink').addEventListener('click', resetThemeCache);
-    themeSelector.addEventListener('change', changeTheme);
+    fontFamilySelector = document.getElementById('fontFamilySelector');
+    fontSizeSelector = document.getElementById('fontSizeSelector');
 
     for (const id in customThemes) addCustomOption(id);
     applyCustomThemeVars();
@@ -96,10 +104,11 @@ function mergeImportedThemes(hostThemes) {
     _importedThemesLoaded = true;
     for (const id in hostThemes) {
         customThemes[id] = hostThemes[id];
-        addCustomOption(id);
+        if (!builtInThemeIds.has(id)) addCustomOption(id);
     }
     localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
     applyCustomThemeVars();
+    syncFontSelectors();
 }
 
 function updateRemoveButtonState() {
@@ -114,6 +123,30 @@ function changeTheme() {
     document.documentElement.setAttribute('data-theme', id);
     localStorage.setItem('ll_config_theme', id);
     updateRemoveButtonState();
+    syncFontSelectors();
+}
+
+function syncFontSelectors() {
+    if (!fontFamilySelector && !fontSizeSelector) return;
+    const computed = getComputedStyle(document.documentElement);
+    if (fontFamilySelector) {
+        const fam = computed.getPropertyValue('--font-family').trim().replace(/"/g, "'");
+        const match = Array.from(fontFamilySelector.options).find(o => o.value === fam);
+        if (match) fontFamilySelector.value = match.value;
+    }
+    if (fontSizeSelector) {
+        const size = computed.getPropertyValue('--font-size-base').trim();
+        const match = Array.from(fontSizeSelector.options).find(o => o.value === size);
+        if (match) fontSizeSelector.value = match.value;
+    }
+}
+
+function updateActiveThemeProperty(prop, value) {
+    const id = themeSelector.value;
+    if (!customThemes[id]) customThemes[id] = {};
+    customThemes[id][prop] = value;
+    localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
+    applyCustomThemeVars();
 }
 
 function removeSelectedTheme() {
@@ -130,15 +163,64 @@ function removeSelectedTheme() {
     changeTheme();
 }
 
-function requestImportTheme() { sendToFusion('import_theme'); }
+function requestImportTheme(type) {
+    sendToFusion('import_theme', { file_type: type });
+}
 
-function requestExportTheme() {
+function requestExportTheme(type) {
     const id = themeSelector.value;
-    const computed = getComputedStyle(document.documentElement);
-    const vars = {};
-    THEME_VARS.forEach(v => { vars[v] = computed.getPropertyValue(v).trim(); });
-    const content = JSON.stringify({ id: id, vars: vars }, null, 2);
-    sendToFusion('export_theme', { content: content, default_name: `${id}.theme.json` });
+    let content, defaultName;
+    if (type === 'css') {
+        content = generateFullCSS();
+        defaultName = 'style.css';
+    } else {
+        const computed = getComputedStyle(document.documentElement);
+        const vars = {};
+        THEME_VARS.forEach(v => { vars[v] = computed.getPropertyValue(v).trim(); });
+        content = JSON.stringify({ id: id, vars: vars }, null, 2);
+        defaultName = `${id}.theme.json`;
+    }
+    sendToFusion('export_theme', { file_type: type, content: content, default_name: defaultName });
+}
+
+// Dumps every known theme (built-in + custom) as a [data-theme="id"] block by
+// briefly applying each id and reading its computed values -- avoids keeping a
+// second, easily-stale copy of the built-in light/dark/sepia values in JS.
+function generateFullCSS() {
+    const originalTheme = document.documentElement.getAttribute('data-theme');
+    const allIds = new Set([...builtInThemeIds, ...Object.keys(customThemes)]);
+    let out = '';
+    let i = 1;
+    for (const id of allIds) {
+        document.documentElement.setAttribute('data-theme', id);
+        const computed = getComputedStyle(document.documentElement);
+        out += `/* ${i}. ${id} */\n[data-theme="${id}"] {\n`;
+        THEME_VARS.forEach(v => {
+            out += `    ${v}: ${computed.getPropertyValue(v).trim()};\n`;
+        });
+        out += `}\n\n`;
+        i++;
+    }
+    document.documentElement.setAttribute('data-theme', originalTheme);
+    return out.trim() + '\n';
+}
+
+function parseStyleCSS(cssText) {
+    const themeRegex = /(?:\/\*[\s\S]*?\*\/\s*)?(?:(:root)|\[data-theme=["']?([^"']+)["']?\])\s*\{([^}]+)\}/g;
+    let match;
+    const parsedThemes = {};
+    while ((match = themeRegex.exec(cssText)) !== null) {
+        const themeId = match[1] ? 'light' : match[2];
+        const content = match[3];
+        const vars = {};
+        const varRegex = /(--[\w-]+)\s*:\s*([^;]+?)(?=\s*;|\s*$)/g;
+        let vMatch;
+        while ((vMatch = varRegex.exec(content)) !== null) {
+            vars[vMatch[1].trim()] = vMatch[2].trim();
+        }
+        parsedThemes[themeId] = vars;
+    }
+    return parsedThemes;
 }
 
 function resetThemeCache() {
@@ -158,24 +240,60 @@ function resetThemeCache() {
 }
 
 function handleThemeImported(parsed) {
-    try {
-        const themeData = JSON.parse(parsed.content);
-        if (themeData.vars && themeData.id !== undefined) {
-            customThemes[themeData.id] = themeData.vars;
+    if (parsed.file_type === 'css') {
+        try {
+            const parsedThemes = parseStyleCSS(parsed.content);
+            let firstCustomId = null;
+            for (const id in parsedThemes) {
+                customThemes[id] = parsedThemes[id];
+                if (!builtInThemeIds.has(id)) {
+                    addCustomOption(id);
+                    if (!firstCustomId) firstCustomId = id;
+                }
+                sendToFusion('save_imported_theme', { id: id, vars: parsedThemes[id] });
+            }
             localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
-            sendToFusion('save_imported_theme', { id: themeData.id, vars: themeData.vars });
-            addCustomOption(themeData.id);
             applyCustomThemeVars();
-            themeSelector.value = themeData.id;
-            changeTheme();
-        }
-    } catch (e) { console.log('Invalid theme JSON', e); }
+            if (firstCustomId) {
+                themeSelector.value = firstCustomId;
+                changeTheme();
+            } else {
+                syncFontSelectors();
+            }
+        } catch (e) { console.log('Invalid theme CSS', e); }
+    } else {
+        try {
+            const themeData = JSON.parse(parsed.content);
+            if (themeData.vars && themeData.id !== undefined) {
+                customThemes[themeData.id] = themeData.vars;
+                localStorage.setItem('ll_config_custom_themes', JSON.stringify(customThemes));
+                sendToFusion('save_imported_theme', { id: themeData.id, vars: themeData.vars });
+                addCustomOption(themeData.id);
+                applyCustomThemeVars();
+                themeSelector.value = themeData.id;
+                changeTheme();
+            }
+        } catch (e) { console.log('Invalid theme JSON', e); }
+    }
 }
 
 // --- HELPERS ---
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) section.classList.toggle('collapsed');
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const panel = document.getElementById(tabId);
+    if (panel) panel.classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+        }
+    });
+    localStorage.setItem('ll_config_active_tab', tabId);
 }
 
 function isConfigMatch(data, configName) {
@@ -286,7 +404,11 @@ function refreshData() {
 
 function renderUI(data) {
     lastReceivedData = data;
-    if (data.addin_version) document.getElementById('versionTag').textContent = 'v' + data.addin_version;
+    if (data.addin_version) {
+        document.getElementById('versionTag').textContent = 'v' + data.addin_version;
+        const footerVersionEl = document.getElementById('footerVersion');
+        if (footerVersionEl) footerVersionEl.textContent = 'v' + data.addin_version + ', August 2026';
+    }
     if (data.imported_themes) mergeImportedThemes(data.imported_themes);
     const docNameEl = document.getElementById('docName');
     if (docNameEl) docNameEl.innerText = data.doc_name || "Unknown Design";
