@@ -191,16 +191,16 @@ body {
 
 .title-group { flex-grow: 1; }
 
-h2 { 
-    margin-top: 0; 
-    color: var(--text-main); 
-    text-transform: uppercase; 
-    font-size: 14px; 
-    letter-spacing: 1px; 
-    margin-bottom: 2px; 
+h2 {
+    margin-top: 0;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-size: calc(var(--font-size-base) + 1px);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
 }
 
-.sub-header { color: var(--text-sub); font-size: 11px; font-style: italic; }
+.sub-header { color: var(--text-sub); font-size: calc(var(--font-size-base) - 2px); font-style: italic; }
 
 /* --- TABS --- */
 .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 15px; }
@@ -214,7 +214,7 @@ h2 {
     font-weight: bold;
     border-radius: 4px 4px 0 0;
     transition: 0.2s;
-    font-size: 12px;
+    font-size: calc(var(--font-size-base) - 1px);
 }
 .tab-btn:hover { background: var(--tab-active-bg); opacity: 0.8; }
 .tab-btn.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-bottom: 2px solid var(--tab-active-text); margin-bottom: -2px; }
@@ -228,7 +228,7 @@ h2 {
     padding-top: 10px;
     border-top: 1px solid var(--border-color);
     color: var(--text-sub);
-    font-size: 11px;
+    font-size: calc(var(--font-size-base) - 2px);
 }
 
 /* THEME TOGGLE SWITCH */
@@ -298,7 +298,7 @@ input:checked + .theme-slider:before { transform: translateX(16px); }
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-size: 11px;
+    font-size: calc(var(--font-size-base) - 2px);
     color: var(--text-sub);
     font-weight: bold;
 }
@@ -306,11 +306,11 @@ input:checked + .theme-slider:before { transform: translateX(16px); }
 .fav-toggle:hover { color: var(--text-main); }
 
 
-h3 { margin: 0; font-size: 13px; color: var(--text-sub); pointer-events: none; }
+h3 { margin: 0; font-size: var(--font-size-base); color: var(--text-sub); pointer-events: none; }
 
 .arrow {
     color: var(--text-sub);
-    font-size: 10px;
+    font-size: calc(var(--font-size-base) - 3px);
     transition: transform 0.2s ease;
 }
 
@@ -336,6 +336,8 @@ button {
     padding: 8px 12px;
     border-radius: 4px;
     font-weight: 600;
+    font-family: inherit;
+    font-size: inherit;
     transition: background 0.2s;
 }
 
@@ -360,7 +362,7 @@ button {
     background-color: var(--btn-primary);
     color: var(--btn-primary-text, white);
     padding: 4px 10px;
-    font-size: 12px;
+    font-size: calc(var(--font-size-base) - 1px);
     border: none;
 }
 .icon-btn:hover { background-color: var(--btn-primary-hover); color: var(--btn-primary-text, white); }
@@ -380,7 +382,7 @@ button {
     border: 1px solid var(--border-color);
     text-align: left;
     padding: 10px;
-    font-size: 14px;
+    font-size: calc(var(--font-size-base) + 1px);
 }
 .config-btn:hover { background-color: var(--row-hover); }
 
@@ -399,7 +401,7 @@ button {
     border: 1px solid var(--border-color);
     color: var(--text-sub);
     padding: 0;
-    font-size: 14px;
+    font-size: calc(var(--font-size-base) + 1px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -409,7 +411,7 @@ button {
 .update-btn:hover { background: #224455; color: #88ccff; border-color: #88ccff; }
 
 
-label { display: block; font-size: 11px; font-weight: bold; color: var(--text-sub); margin-bottom: 3px; }
+label { display: block; font-size: calc(var(--font-size-base) - 2px); font-weight: bold; color: var(--text-sub); margin-bottom: 3px; }
 
 /* --- INPUTS --- */
 input[type="text"], input[type="number"], select {
@@ -420,6 +422,8 @@ input[type="text"], input[type="number"], select {
     border-radius: 3px;
     width: 100%;
     box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
 }
 .input-group { display: flex; gap: 5px; margin-top: 10px; }
 
@@ -434,7 +438,7 @@ input[type="text"], input[type="number"], select {
     border-radius: 4px;
     border: 1px solid var(--row-border);
 }
-.param-label { width: 40%; font-weight: bold; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.param-label { width: 40%; font-weight: bold; overflow: hidden; text-overflow: ellipsis; font-size: calc(var(--font-size-base) - 1px); }
 .param-input { width: 55%; }
 
 .feature-row {
