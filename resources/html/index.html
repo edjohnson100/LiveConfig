@@ -26,7 +26,7 @@
         <div id="docName" class="sub-header" style="margin-bottom: 12px;">Scanning...</div>
 
         <div id="sec-configs" class="section">
-            <div class="section-header" onclick="toggleSection('sec-configs')">
+            <div class="section-header" tabindex="0" role="button" aria-expanded="true" onclick="toggleSection('sec-configs')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('sec-configs');}">
                 <div class="header-title">
                     <span class="arrow">▼</span>
                     <h3>Snapshots</h3>
@@ -45,7 +45,7 @@
         </div>
 
         <div id="sec-params" class="section">
-            <div class="section-header" onclick="toggleSection('sec-params')">
+            <div class="section-header" tabindex="0" role="button" aria-expanded="true" onclick="toggleSection('sec-params')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('sec-params');}">
                 <div class="header-title">
                     <span class="arrow">▼</span>
                     <h3>Live Parameters</h3>
@@ -68,7 +68,7 @@
         </div>
 
         <div id="sec-features" class="section">
-            <div class="section-header" onclick="toggleSection('sec-features')">
+            <div class="section-header" tabindex="0" role="button" aria-expanded="true" onclick="toggleSection('sec-features')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('sec-features');}">
                 <div class="header-title">
                     <span class="arrow">▼</span>
                     <h3>Tracked Features (CFG_)</h3>
@@ -84,7 +84,7 @@
 
     <div id="tab-themes" class="tab-content">
         <div class="section" id="sec-theme-manager">
-            <div class="section-header" onclick="toggleSection('sec-theme-manager')">
+            <div class="section-header" tabindex="0" role="button" aria-expanded="true" onclick="toggleSection('sec-theme-manager')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('sec-theme-manager');}">
                 <div class="header-title">
                     <span class="arrow">▼</span>
                     <h3>Theme Manager</h3>

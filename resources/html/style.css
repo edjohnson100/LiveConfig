@@ -51,6 +51,13 @@
     --active-bg: #fff3e0;
 
     --toggle-bg: #ccc;
+
+    /* Accessibility (Theme Designer Pro WCAG pass -- see Archive/!Fleet_Standardization_Prompt.md) */
+    --btn-primary-text: #ffffff;
+    --btn-success-text: #000000;
+    --focus-ring: #0078d4;
+    --text-danger: #721c24;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="dark"] {
@@ -100,6 +107,12 @@
     --active-bg: #3d2f25;
 
     --toggle-bg: #555;
+
+    --btn-primary-text: #ffffff;
+    --btn-success-text: #ffffff;
+    --focus-ring: #4cc9f0;
+    --text-danger: #f8d7da;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="sepia"] {
@@ -149,6 +162,12 @@
     --active-bg: #ecd9b8;
 
     --toggle-bg: #d8c8a8;
+
+    --btn-primary-text: #000000;
+    --btn-success-text: #000000;
+    --focus-ring: #a9702f;
+    --text-danger: #8b0000;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -326,7 +345,7 @@ button {
 }
 .secondary-btn:hover { background-color: var(--btn-secondary-hover); }
 
-.btn-primary { background-color: var(--btn-primary); color: #fff; width: 100%; box-sizing: border-box; }
+.btn-primary { background-color: var(--btn-primary); color: var(--btn-primary-text, #fff); width: 100%; box-sizing: border-box; }
 .btn-primary:hover { background-color: var(--btn-primary-hover); }
 .btn-secondary { background-color: var(--btn-secondary); color: var(--btn-secondary-text); width: 100%; box-sizing: border-box; }
 .btn-secondary:hover { background-color: var(--btn-secondary-hover); }
@@ -339,12 +358,12 @@ button {
 /* Rescan Button */
 .icon-btn {
     background-color: var(--btn-primary);
-    color: white;
+    color: var(--btn-primary-text, white);
     padding: 4px 10px;
     font-size: 12px;
     border: none;
 }
-.icon-btn:hover { background-color: var(--btn-primary-hover); color: white; }
+.icon-btn:hover { background-color: var(--btn-primary-hover); color: var(--btn-primary-text, white); }
 
 /* CONFIG LIST AS ROWS */
 .config-row {
@@ -386,7 +405,7 @@ button {
     justify-content: center;
 }
 .action-btn:hover { background: var(--row-hover); color: var(--text-main); }
-.delete-btn:hover { background: #552222; color: #ff8888; border-color: #ff8888; }
+.delete-btn:hover { background: #552222; color: var(--text-danger, #ff8888); border-color: var(--text-danger, #ff8888); }
 .update-btn:hover { background: #224455; color: #88ccff; border-color: #88ccff; }
 
 
@@ -458,3 +477,20 @@ input[type="text"], input[type="number"], select {
 }
 input:checked + .slider { background-color: var(--btn-success); }
 input:checked + .slider:before { transform: translateX(16px); }
+
+/* --- FOCUS (keyboard-only, never shown on mouse click) --- */
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+.section-header:focus-visible {
+    outline: 2px solid var(--focus-ring, #0078d4);
+    outline-offset: 2px;
+}
+.section-header:focus-visible {
+    outline-offset: -2px;
+}
+.switch input:focus-visible + .slider,
+.theme-switch input:focus-visible + .theme-slider {
+    outline: 2px solid var(--focus-ring, #0078d4);
+    outline-offset: 2px;
+}

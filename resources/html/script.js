@@ -46,15 +46,16 @@ const THEME_VARS = [
     '--row-bg', '--row-border', '--row-hover',
     '--input-bg', '--input-border', '--input-text', '--input-placeholder',
     '--header-hover', '--tab-bg', '--tab-active-bg', '--tab-text', '--tab-active-text',
-    '--btn-primary', '--btn-primary-hover',
+    '--btn-primary', '--btn-primary-hover', '--btn-primary-text',
     '--btn-secondary', '--btn-secondary-text', '--btn-secondary-hover',
-    '--btn-success', '--btn-success-hover',
+    '--btn-success', '--btn-success-hover', '--btn-success-text',
     '--status-success-bg', '--status-success-text',
     '--status-error-bg', '--status-error-text',
     '--status-info-bg', '--status-info-text',
     '--banner-warning-bg', '--banner-warning-text', '--banner-warning-border',
     '--active-border', '--active-text', '--active-bg',
-    '--toggle-bg'
+    '--toggle-bg',
+    '--focus-ring', '--text-danger', '--overlay-bg'
 ];
 const builtInThemeIds = new Set(['light', 'dark', 'sepia']);
 let customThemes = JSON.parse(localStorage.getItem('ll_config_custom_themes') || '{}');
@@ -280,7 +281,10 @@ function handleThemeImported(parsed) {
 // --- HELPERS ---
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
-    if (section) section.classList.toggle('collapsed');
+    if (!section) return;
+    section.classList.toggle('collapsed');
+    const header = section.querySelector('.section-header[aria-expanded]');
+    if (header) header.setAttribute('aria-expanded', String(!section.classList.contains('collapsed')));
 }
 
 function switchTab(tabId) {
@@ -373,7 +377,7 @@ function waitForFusion() {
         if (connectionAttempts > MAX_ATTEMPTS) {
             console.error("Connection Timeout: No adsk object found.");
             document.body.innerHTML = `
-                <div style="padding: 20px; color: #ff8888; text-align: center;">
+                <div style="padding: 20px; color: var(--text-danger, #ff8888); text-align: center;">
                     <h3>Connection Failed</h3>
                     <p>Fusion 360 API bridge not found.</p>
                 </div>
